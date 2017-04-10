@@ -1,10 +1,14 @@
 /************************************************************
  * Vue Components
  ************************************************************/
+
+/**
+ * The Vue MessageItem Component
+ */
 Vue.component('message-item', {
-	props: ['msgData'],
+  props: ['msgData'],
   template: `<li class="list-group-item">
-  	<div class="">
+    <div class="">
       <div class="message-profile">
         <img width="36" height="36" class="img-circle" 
           src="assets/bot.png" />
@@ -26,7 +30,7 @@ Vue.component('message-item', {
           </div>          
         </div>
       </div>
-  	</div>
+    </div>
   </li>`,
 
   data: function () {
@@ -60,7 +64,7 @@ Vue.component('message-item', {
 
   methods: {
 
-    updateScroll: function (later) {
+    updateScroll: function () {
       var body = document.getElementsByTagName('body')[0];
       body.scrollTop = body.scrollHeight;
     },
@@ -73,129 +77,132 @@ Vue.component('message-item', {
   },
 
   updated: function () {
-    this.updateScroll(true);
+    this.updateScroll();
   },
 
   mounted: function () {
-    this.updateScroll(false);
+    this.updateScroll();
   }
 
 });
 
+/**
+ * The Vue HoverCommand Component
+ */
 Vue.component('hover-command', {
-	props: ['command'],
-	template: `<li class="list-group-item">
-		<p class="hover-list-item">
-			<strong class="pull-left">{{command.cmd}}</strong>
-			<span class="pull-right">{{command.desc}}</span>
-		</p>
-	</li>`
+  props: ['command'],
+  template: `<li class="list-group-item">
+    <p class="hover-list-item">
+      <strong class="pull-left">{{command.cmd}}</strong>
+      <span class="pull-right">{{command.desc}}</span>
+    </p>
+  </li>`
 });
 
 var app = new Vue({
-	el: '#app',
+  el: '#app',
 
   data: {
-  	input: '',
+    input: '',
 
-  	auth: {
-  		user: null,
-  		email: '',
-  		password: '',
-  		message: '',
-  		hasErrors: false
-  	},
+    auth: {
+      user: null,
+      email: '',
+      password: '',
+      message: '',
+      hasErrors: false
+    },
 
-  	commands: [],
+    commands: [],
     hoverCommands: [],
-  	messages: [],
+    messages: [],
     attachEvents: false
   },
 
   methods: {
 
-  	/**
-  	 * Authenticate the user
-  	 *
-  	 * @param object event
-  	 */
-  	login: function (event) {
-  		var vm = this;
-  		vm.auth.message = '';
-  		vm.auth.hasErrors = false;
+    /**
+     * Authenticate the user
+     *
+     * @param object event
+     */
+    login: function (event) {
+      var vm = this;
+      vm.auth.message = '';
+      vm.auth.hasErrors = false;
 
-  		if (vm.auth.email === '' || vm.auth.password === '') {
-  			alert('Please provide the email and password');
-  			return;
-  		}
-  		// Sign-in the user with the email and password
-  		firebase.auth().signInWithEmailAndPassword(vm.auth.email, vm.auth.password)
-	  		.then(function (data) {
-	  			vm.auth.user = firebase.auth().currentUser;
-	  			//vm.loadMessages();
-	  		}).catch(function(error) {
-				  vm.auth.message = error.message;
-				  vm.auth.hasErrors = true;
-				});
-  	},
+      if (vm.auth.email === '' || vm.auth.password === '') {
+        alert('Please provide the email and password');
+        return;
+      }
+      // Sign-in the user with the email and password
+      firebase.auth().signInWithEmailAndPassword(vm.auth.email, vm.auth.password)
+        .then(function (data) {
+          vm.auth.user = firebase.auth().currentUser;
+          //vm.loadMessages();
+        }).catch(function(error) {
+          vm.auth.message = error.message;
+          vm.auth.hasErrors = true;
+        });
+    },
 
-  	/**
-  	 * Create a new user account
-  	 * 
-  	 * @param object event
-  	 */
-  	signUp: function (event) {
-  		var vm = this;
-  		vm.auth.message = '';
-  		vm.auth.hasErrors = false;
+    /**
+     * Create a new user account
+     * 
+     * @param object event
+     */
+    signUp: function (event) {
+      var vm = this;
+      vm.auth.message = '';
+      vm.auth.hasErrors = false;
 
-  		if (vm.auth.email === '' || vm.auth.password === '') {
-  			alert('Please provide the email and password');
-  			return;
-  		}
+      if (vm.auth.email === '' || vm.auth.password === '') {
+        alert('Please provide the email and password');
+        return;
+      }
 
-  		// Create a new user in firebase
-  		firebase.auth().createUserWithEmailAndPassword(vm.auth.email, vm.auth.password)
-	  		.then(function (data) {
-	  			vm.auth.message = 'Successfully created user';
-	  			vm.auth.user = firebase.auth().currentUser;
-	  			vm.auth.email = '';
-	  			vm.auth.password = '';
-	  			// Load the messages of the user
-	  			//vm.loadMessages();
-	  		}).catch(function(error) {
-				  vm.auth.message = error.message;
-				  vm.auth.hasErrors = true;
-				});
-  	},
+      // Create a new user in firebase
+      firebase.auth().createUserWithEmailAndPassword(vm.auth.email, vm.auth.password)
+        .then(function (data) {
+          vm.auth.message = 'Successfully created user';
+          vm.auth.user = firebase.auth().currentUser;
+          vm.auth.email = '';
+          vm.auth.password = '';
+          // Load the messages of the user
+          //vm.loadMessages();
+        }).catch(function(error) {
+          vm.auth.message = error.message;
+          vm.auth.hasErrors = true;
+        });
+    },
 
-  	/**
-  	 * Signout the currently logged-in user
-  	 */
-  	signOut: function () {
+    /**
+     * Signout the currently logged-in user
+     */
+    signOut: function () {
       this.messages = [];
       this.attachEvents = false;
 
-  		firebase.auth().signOut()
-	  		.then(function(error) {
+      firebase.auth().signOut()
+        .then(function(error) {
           console.log('signout response - ', error);
-	  			this.auth.user = firebase.auth().currentUser;
-	  			this.auth.message = 'User signed out Successfully';
-	  		}.bind(this), function (error) {
-	  			alert('Failed to signout user, try again later');
-	  		});
-  	},
+          this.auth.user = firebase.auth().currentUser;
+          this.auth.message = 'User signed out Successfully';
+        }.bind(this), function (error) {
+          alert('Failed to signout user, try again later');
+        });
+    },
 
     /**
      * Handles user command inputs
      *
      */
-  	askBot: function (event) {
-  		var vm = this,
-  			bot = null;
-  		
+    askBot: function (event) {
+      var vm = this,
+        bot = null;
+      
       // Check if the input is a command
-  		if (/\/[a-z]+\s/.test(vm.input)) {
+      if (/\/[a-z]+\s/.test(vm.input)) {
         response = slackbot.execCommand(vm.input);
       } else {
         response = fireUtil.addMessage({
@@ -206,25 +213,25 @@ var app = new Vue({
         });
       }
 
-  		if (response === null) {
-  			vm.messages.push({
-  				text: 'I am sorry, i do not recognized that command.'
-  			});
-  		}
+      if (response === null) {
+        vm.messages.push({
+          text: 'I am sorry, i do not recognized that command.'
+        });
+      }
 
-			// Clear the input
-  		vm.input = '';
-  	},
+      // Clear the input
+      vm.input = '';
+    },
 
-  	/**
-  	 * Load the user's messages
-  	 */
-  	attachFirebaseEvents: function () {
+    /**
+     * Load the user's messages
+     */
+    attachFirebaseEvents: function () {
       if (this.attachEvents === true) {
         return;
       }
 
-  		var vm = this,
+      var vm = this,
         messagesRef = firebase.database().ref('chats/' + vm.auth.user.uid + '/messages'),
         messages = [];
 
@@ -254,95 +261,79 @@ var app = new Vue({
       });
 
       this.attachEvents = true;
-  	},
+    },
 
     /**
      * Load the available commands based on the user input
      */
-  	loadCommands: function () {
-  		firebase.database().ref('/commands').once('value', function (snap) {
-  			this.commands = snap.val();
-  		}.bind(this));
-  	},
+    loadCommands: function () {
+      firebase.database().ref('/commands').once('value', function (snap) {
+        this.commands = snap.val();
+      }.bind(this));
+    },
 
-  	/**
-  	 * Dismiss the alert message
-  	 */
-  	dismissAlert: function () {
-  		this.auth.message = '';
-  		this.auth.hasErrors = false;
-  	}
+    /**
+     * Dismiss the alert message
+     */
+    dismissAlert: function () {
+      this.auth.message = '';
+      this.auth.hasErrors = false;
+    }
 
   },
 
   computed: {
 
-  	parsedMessages: function () {
-  		// if (this.auth.user === null) {
-  		// 	return [{text: 'Oops, looks like you are not authenticated'}];
-  		// } else {
-    //     if (this.messages.length === 0) {
-    //       return [{text: 'Please wait till i load our conversations :-)'}];
-    //     }
+    /**
+     * Determines if the commands helper should be shown
+     *
+     * @return boolean
+     */
+    showHoverCommands: function () {
+      return this.hoverCommands.length > 0;
+    },
 
-    //     return this.messages;
-    //   }
-  	},
-
-  	/**
-  	 * Determines if the commands helper should be shown
-  	 *
-  	 * @return boolean
-  	 */
-  	showHoverCommands: function () {
-  		return this.hoverCommands.length > 0;
-  	},
-
-  	/**
-  	 * Determines if the user is authenticated
-  	 *
-  	 * @return boolean
-  	 */
-  	isAuthenticated: function () {
-			firebase.auth().onAuthStateChanged(function (user) {
-				if (user) {
-					this.auth.user = user;
+    /**
+     * Determines if the user is authenticated
+     *
+     * @return boolean
+     */
+    isAuthenticated: function () {
+      firebase.auth().onAuthStateChanged(function (user) {
+        if (user) {
+          this.auth.user = user;
           // Attach firebase db events
           this.attachFirebaseEvents();
           // Load the commands
           this.loadCommands();
-				} else {
-					this.auth.user = null;
-				}
-			}.bind(this));
+        } else {
+          this.auth.user = null;
+        }
+      }.bind(this));
 
-  		return (this.auth.user !== null);
-  	}
+      return (this.auth.user !== null);
+    }
 
   },
 
   watch: {
 
-  	/**
-  	 * Watch the user input for changes
-  	 *
-  	 * @param string input
-  	 */
-  	input: function (input) {
-  		if (input === '') {
-  			this.hoverCommands = [];
-  			return;
-  		}
+    /**
+     * Watch the user input for changes
+     *
+     * @param string input
+     */
+    input: function (input) {
+      if (input === '') {
+        this.hoverCommands = [];
+        return;
+      }
 
-  		// Filter the commands based on the user input
-  		this.hoverCommands = _.filter(this.commands, function (cmdObj) {
-  			return _.startsWith(cmdObj.cmd, input);
-  		});
-  	}
-  },
-
-  beforeUpdate: function () {
-    
-  },
+      // Filter the commands based on the user input
+      this.hoverCommands = _.filter(this.commands, function (cmdObj) {
+        return _.startsWith(cmdObj.cmd, input);
+      });
+    }
+  }
 
 });
