@@ -53,6 +53,10 @@ Vue.component('message-item', {
   computed: {
 
     msgText: function () {
+      if (this.text === undefined) {
+        return '';
+      }
+      
       return this.text.charAt(0).toUpperCase() + this.text.slice(1);
     },
 
